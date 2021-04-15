@@ -13,6 +13,11 @@ const sessionOptions = {
 };
 app.use(session(sessionOptions));
 
+
+var unirest = require("unirest");
+var req = unirest("GET", "https://movie-database-imdb-alternative.p.rapidapi.com/");
+//lines 17 and 18 copied from https://rapidapi.com/rapidapi/api/movie-database-imdb-alternative
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
