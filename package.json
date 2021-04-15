@@ -16,7 +16,7 @@
     "url": "https://github.com/ab7261/FinalProject/issues"
   },
   "homepage": "https://github.com/ab7261/FinalProject#readme",
-  "devDependencies": {
+  "Dependencies": {
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "hbs": "^4.1.1",
