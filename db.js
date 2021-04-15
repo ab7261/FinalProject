@@ -14,7 +14,7 @@ const User = new mongoose.Schema({
 });
 mongoose.model('User',User);
 
-mongoose.connect('mongodb://localhost/finalproject');
+mongoose.connect(process.env.MONGODB_URI);
 
 
 
