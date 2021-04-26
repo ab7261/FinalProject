@@ -1,25 +1,27 @@
 {
-  "name": "finalproject",
+  "name": "ab7261-final-project",
   "version": "1.0.0",
   "description": "Overview:",
-  "main": "index.js",
+  "main": "app.js",
+  "dependencies": {
+    "express-session": "^1.17.1",
+    "express": "^4.17.1",
+    "hbs": "^4.1.1",
+    "mongoose": "^5.12.3",
+    "unirest": "^0.6.0"
+  },
+  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ab7261/FinalProject.git"
+    "url": "git+https://github.com/nyu-csci-ua-0480-034-spring-2021/ab7261-final-project.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/ab7261/FinalProject/issues"
+    "url": "https://github.com/nyu-csci-ua-0480-034-spring-2021/ab7261-final-project/issues"
   },
-  "homepage": "https://github.com/ab7261/FinalProject#readme",
-  "devDependencies": {
-    "express": "^4.17.1",
-    "express-session": "^1.17.1",
-    "hbs": "^4.1.1",
-    "mongoose": "^5.12.3"
-  }
+  "homepage": "https://github.com/nyu-csci-ua-0480-034-spring-2021/ab7261-final-project#readme"
 }
