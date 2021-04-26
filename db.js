@@ -10,13 +10,15 @@ const User = new mongoose.Schema({
   // password hash provided by authentication plugin
   timesPlayed:Number,
   timesWon: Number,
-  displayName: String
+  displayName: String,
+  backGround: String,
+  colorcode: String
 });
 mongoose.model('User',User);
 
 mongoose.connect(process.env.MONGODB_URI);
 
-
+//process.env.MONGODB_URI
 
 //db.User.insert({timesPlayed:0,timesWon:0,displayName:"test"})
 
