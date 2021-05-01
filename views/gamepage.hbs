@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<head>
+<body>
+	<div>
+		<h1>Gamepage</h1>
+		<h2 id = "fir">Connect {{movie.actorone}} to {{movie.actortwo}}</h2>
+    <h3 id = "pen"></h3>
+  <label id = "prin" for="url">{{movie.actorone}} starred with </label><br>
+  <input type="text" id="acname" name={{movie.actorone}} value = "Actor Name"><br>
+  <label id = "desc" for="url">in the movie </label><br>
+  <input type="text" id="og" name= {{movie.actortwo}} value = "Movie Name"><br>
+  <input type="submit" id = "button" value="Submit"> 
+  <form method="GET" action="/gamepage">
+  <input type ="submit" id="booton"  value = "Play Again">
+</form>
+ <form method="GET" action="/">
+  <input type ="submit" id="buon"  value = "Go to Home Page">
+</form>
+  <form method="GET" action="/reset">
+  <input type = "submit" id = "boton" value = "Give Up (WILL RESET YOUR STREAK)">
+  </form>
+	<script src="../index.js"></script>
+	</div>
+</body>
+</head>
+</html>

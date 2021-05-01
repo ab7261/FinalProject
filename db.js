@@ -6,20 +6,23 @@ const mongoose = require('mongoose');
 // * so users have a username and password
 // * they also have a number for how many times they've played and one for how many times they've won.
 const User = new mongoose.Schema({
-  // username provided by authentication plugin
-  // password hash provided by authentication plugin
-  timesPlayed:Number,
+username:String,
+hash: String,
   timesWon: Number,
   displayName: String,
-  backGround: String,
-  colorcode: String
+  salt: String,
+  winstreak: Number
+});
+
+
+const Actor = new mongoose.Schema({
+num: Number,
+name: String
 });
 mongoose.model('User',User);
+mongoose.model('Actor',Actor);
 
 mongoose.connect(process.env.MONGODB_URI);
 
 //process.env.MONGODB_URI
 
-//db.User.insert({timesPlayed:0,timesWon:0,displayName:"test"})
-
-// TODO: add remainder of setup for slugs, connection, registering models, etc. below

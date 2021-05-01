@@ -1,0 +1,17 @@
+<h2>Profile</h2>
+<body>
+  <h2>Display Name: {{user.displayName}}</h2> <br>
+  <form method="GET" action="/setdisplay">
+  <input type ="submit" id="booton"  value = "Change Display Name">
+</form>
+  <h2>Times Won: {{user.timesWon}}</h2> <br>
+  <h2 id="wins">Winstreak: {{user.winstreak}}</h2> <br>
+  <input type = "button" id = "boton" value = "Reset Streak">
+   <form method="GET" action="/logout">
+  <input type ="submit" id="boooton"  value = "Log Out">
+</form>
+  
+ 	<script src="../inde.js"></script>
+<br></br>
+<a href=/>HomePage</a>
+</body>

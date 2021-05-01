@@ -2,125 +2,361 @@ const express = require('express');
 const app = express();
 const db = require('./db');
 const path = require('path');
+const MovieDB = require('node-themoviedb');
+const mdb = new MovieDB('637ef235f46d7e960356aa83784bc471');
 const bodyParser = require('body-parser');
 const session = require('express-session');
+const bcrypt = require('bcrypt')
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
 const mongoose = require('mongoose');
+const MongoStore = require("connect-mongo");
 const x = 1;
 const User = mongoose.model('User');
+const Actor = mongoose.model('Actor');
 const sessionOptions = {
     secret: 'secret',
-    resave: true,
-      saveUninitialized: true
+    resave: false,
+    saveUninitialized: true,
+    store: MongoStore.create({mongoUrl:process.env.MONGODB_URI}) 
 };
-app.use(session(sessionOptions));
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
-var unirest = require("unirest");
-var req = unirest("GET", "https://movie-database-imdb-alternative.p.rapidapi.com/");
-/*Query Format
-req.query({
-	"s": "movietitle",
-	"page": "pagenumber",
-	"y": "yearofrelease",
-	"type": "type of result",
-	"r": "data format"
-});
-*/
+// serve static files
+app.use(express.static(path.join(__dirname)));
+app.use(session(sessionOptions));
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(new LocalStrategy(
+  function(username, password, done) {
+    console.log("hello");
+      User.findOne({ username: username })
+          .then((user) => {
+              if (!user) { return done(null, false) }
+              console.log(password);
+              console.log(user.salt);
+
+              bcrypt.hash(password, user.salt, function(err, hash) {
+                console.log(hash);
+                if(hash===user.hash)
+                return done(null,user);
+                else
+                return done(null,false);         
+                });
+          })
+          .catch((err) => {   
+              done(err);
+          });
+}));
+//below two methods copied from https://gist.github.com/FBosler/513a0f5f845fbf6e937ab768ed88e183#file-passport_local_strategy-js
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+  });
+  
+  passport.deserializeUser((id, done) => {
+  User.findById(id, (err, user) => {
+  done(err, user);
+  });
+  });
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
 
-// body parser setup
-app.use(bodyParser.urlencoded({ extended: false }));
+app.get("/",function(req,res)
+{
+  console.log(req.user);
+  
+  let pass= false;
+  if(req.user)
+pass=true;
 
-// serve static files
-app.use(express.static(path.join(__dirname, 'public')));
+console.log(pass);
+  res.render("HomePage.hbs",{movie:pass});
+});
+
+
+
+app.get("/reset",function(req,res)
+{
+  if(req.user)
+  {
+    User.updateOne({username:req.user.username},{winstreak:0},function(err,obj)
+    {
+
+    });
+
+  }
+
+  res.redirect("/");
+});
+
+app.get("/login",function(req,res)
+{
+  if(req.user)
+  res.redirect("/");
+
+  res.render('login.hbs');
+});
+
+app.get("/register",function(req,res)
+{
+  if(req.user)
+  res.redirect("/");
+
+  res.render('register.hbs');
+});
+
+
+
+const saltRounds = 10;
+app.post("/login",passport.authenticate('local', { failureRedirect: '/login', successRedirect: '/' }), (err, req, res, next) => {
+  if (err) next(err);
+});
+
+
+
+
+
+
+
+app.post("/register",function(req,res)
+{
+let username = req.body.username;
+let pword = req.body.password;
+
+let redundant = User.find({username:username}, async function(err,data)
+  {
+    if(data.length!==0)
+    {
+      res.redirect("/register");
+    }
+    else
+    {
+      let newsalt = await bcrypt.genSalt(10);
+     pword = await bcrypt.hash(pword, newsalt)
+
+     console.log(newsalt);
+     console.log(pword);
+        const create = new User({
+          username:req.body.username,
+          hash: pword,
+          salt: newsalt,
+          displayName: "",
+          winstreak: 0,
+          timesPlayed: 0,
+          timesWon: 0
+        });
+
+        create.save();
+
+      res.redirect("/login");
+    }
+    
+
+  });
+  
+
+
+
+
+
+});
+
+
+app.get("/gamepage",async function(req,res)
+{
+
+  const actorone = Math.floor(Math.random()*20);
+
+  let actortwo = Math.floor(Math.random()*20);
+
+
+  while(actortwo===actorone)
+  {
+    actortwo = Math.floor(Math.random()*20);
+  }
+
+let firstname = await Actor.find({num:actorone});
+console.log()
+firstname = (Array.from(firstname)[0].name);
+
+let secondname = await Actor.find({num:actortwo});
+
+secondname = Array.from(secondname)[0].name;
+
+let film = {
+  actorone:firstname,
+  actortwo:secondname
+};
+
+
+
+  res.render("gamepage.hbs",{movie:film});
+});
+
+
+app.post("/gamepage", async function(req,res)
+{
+  const obj = JSON.stringify(req.body);
+  const aa = JSON.parse(obj);
+    const og = aa.og.toLowerCase();
+    const actor = aa.actor.toLowerCase();
+    const cactor = aa.cactor.toLowerCase();
+    const movie = aa.movie;
+
+    console.log(movie);
+    const args = {
+      query: {
+        query: movie
+      },
+    };
+
+    
+   const result = await mdb.search.movies(args);
+   const string = JSON.stringify(result);
+   const obby = JSON.parse(string);
+   let id = -1;
+   console.log(obby.data.results[0].title);
+
+   for(let i = 0; i<obby.data.results.length;i++)
+   {
+   if(obby.data.results[i].title.toLowerCase()===movie.toLowerCase())
+   {
+     id =obby.data.results[i].id;
+   }
+  }
+
+   if(id!==-1)
+   {
+    const args = {
+      pathParameters: {
+        movie_id: id
+      },
+    };
+
+    const cast = await mdb.movie.getCredits(args);
+
+    const list = cast.data.cast;
+    console.log(actor);
+    console.log(cactor);
+    function isActor (val)
+    {
+      const check = val.name.toLowerCase();
+    
+
+      if(check===actor||check===cactor)
+      {
+        return true;
+      }
+
+    }
+
+    const finalList = list.filter(isActor);
+    console.log(finalList.length);
+
+    if(finalList.length===2)
+    {
+      if(actor===og)
+      {
+        res.send("3");
+       
+
+        if(req.user)
+        {
+           console.log("blabla")
+          console.log(req.user);
+          const nom = req.user.username;
+          User.updateOne({username:req.user.username},{timesWon:req.user.timesWon+1,winstreak:req.user.winstreak+1},function(err,obj)
+          {
+            console.log("success");
+          });
+          const result = await resolveAfter2Seconds();
+          console.log(req.user);
+  
+        }
+      }
+      else
+      {
+        res.send("2");
+      }
+    }
+    else
+    {
+      res.send("1");
+
+    }
+    
+   }
+
+   else
+   {
+    res.send("1");
+   }
+
+
+
+
+});
+
+
 
 app.get("/setdisplay",function(req,res)
 {
+  if(!req.user)
+  res.redirect("/");
+
   res.render('add.hbs');
 });
 
-app.get("/setbackground",function(req,res)
+app.get("/logout",function(req,res)
 {
-  res.render('setbackground.hbs');
-});
+  if(!req.user)
+  res.redirect("/");
 
-app.post("/setbackground",function(req,res)
-{
-  User.updateOne({},{backGround:req.body.color},function(err,obj)
-  {
-  //  console.log("success");
-  });
+  req.logOut();
 
-  switch(req.body.color)
-  {
-    case "White":
-      req.body.colorVal = '#ffffff';
-      break;
-    case "Yellow":
-      req.body.colorVal = '#ffff00';
-    break;
-    case "Blue":
-      req.body.colorVal = '#66ffff';
-    break;
-    case "Green":
-      req.body.colorVal = '#99ff66';
-    break;
-    case "Gray":
-      req.body.colorVal = '#D0D4D4';
-    break;
-  }
-
-console.log(req.body.colorVal);
-  User.updateOne({},{colorcode:req.body.colorVal},function(err,obj)
-  {
-  //  console.log("success");
-  });
-
-  res.redirect("/confirm");
-});
-
-app.get("/confirm",async function(req,res)
-{
-  const result = await resolveAfter2Seconds();
-
-  User.find({},function(err,data)
-  {
-    console.log(data);
-    
-    res.render("confirm.hbs",{movie:data});
-
-  });
-
-});
-app.get("/getdisplay",async function(req,res)
-{
-  const result = await resolveAfter2Seconds();
-  User.find({},function(err,data)
-  {
-    res.render("mymovies.hbs",{movie:data});
-
-  });
-  
+  res.redirect("/");
 
 });
 
 
-app.post('/setdisplay',function(req,res)
-{ 
-  let testme;
-  let stop = 1;
-  console.log(req.body.newName);
-  
-  User.findOne({},function(err,data)
-  {
-    console.log(data);
-  })
-  User.updateOne({},{displayName:req.body.newName},function(err,obj)
+app.get("/profile", async function(req,res)
+{
+
+  if(!req.user)
+  res.redirect("/");
+
+  res.render("profile.hbs",{user:req.user});
+});
+
+app.get("/profile:reset",async function(req,res)
+{
+
+ User.updateOne({username:req.user.username},{winstreak:0},function(err,obj)
   {
     console.log("success");
   });
-  res.redirect("/getdisplay");
+  const result = await resolveAfter2Seconds();
+
+  
+
+});
+
+
+
+
+
+app.post('/setdisplay',async function(req,res)
+{ 
+  User.updateOne({username:req.user.username},{displayName:req.body.newName},function(err,obj)
+  {
+    console.log("success");
+  });
+  const result = await resolveAfter2Seconds();
+  res.redirect("/profile");
 });
 
 
