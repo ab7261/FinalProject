@@ -226,12 +226,7 @@ app.post("/gamepage", async function(req,res)
    if(obby.data.results[i].title.toLowerCase()===movie.toLowerCase())
    {
      id =obby.data.results[i].id;
-   }
-  }
-
-   if(id!==-1)
-   {
-    const args = {
+     const args = {
       pathParameters: {
         movie_id: id
       },
@@ -277,29 +272,29 @@ app.post("/gamepage", async function(req,res)
           console.log(req.user);
   
         }
+        return;
       }
       else
       {
         res.send("2");
+        return;
       }
     }
-    else
-    {
-      res.send("1");
-
-    }
-    
    }
+  }
 
-   else
-   {
+  
+
+  
     res.send("1");
-   }
+   
 
 
 
 
 });
+
+
 
 
 
