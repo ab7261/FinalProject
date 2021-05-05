@@ -97,7 +97,7 @@ app.get("/login",function(req,res)
 {
   if(req.user)
   res.redirect("/");
-
+else
   res.render('login.hbs');
 });
 
@@ -105,7 +105,7 @@ app.get("/register",function(req,res)
 {
   if(req.user)
   res.redirect("/");
-
+  else
   res.render('register.hbs');
 });
 
@@ -301,8 +301,8 @@ app.post("/gamepage", async function(req,res)
 app.get("/setdisplay",function(req,res)
 {
   if(!req.user)
-  res.redirect("/");
-
+ {res.redirect("/");}
+  else
   res.render('add.hbs');
 });
 
@@ -310,11 +310,11 @@ app.get("/logout",function(req,res)
 {
   if(!req.user)
   res.redirect("/");
-
+else{
   req.logOut();
 
   res.redirect("/");
-
+}
 });
 
 
@@ -323,7 +323,7 @@ app.get("/profile", async function(req,res)
 
   if(!req.user)
   res.redirect("/");
-
+  else
   res.render("profile.hbs",{user:req.user});
 });
 
